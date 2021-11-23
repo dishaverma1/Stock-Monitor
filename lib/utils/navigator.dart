@@ -61,7 +61,7 @@ void justFinish(BuildContext context) {
 }
 
 /// Pops the stack [times] number of times.
-void popRepeated({@required BuildContext context, @required int times}) {
+void popRepeated({required BuildContext context, required int times}) {
   for (var index = 0; index < times; index++) {
     Navigator.pop(context);
   }

@@ -16,8 +16,8 @@ class StockFetchResponse {
     this.data,
   });
 
-  bool success;
-  List<Datum> data;
+  bool? success;
+  List<Datum>? data;
 
   factory StockFetchResponse.fromMap(Map<String, dynamic> json) =>
       StockFetchResponse(
@@ -31,7 +31,7 @@ class StockFetchResponse {
         "success": success == null ? null : success,
         "data": data == null
             ? null
-            : List<dynamic>.from(data.map((x) => x.toMap())),
+            : List<dynamic>.from(data!.map((x) => x.toMap())),
       };
 }
 
@@ -47,14 +47,14 @@ class Datum {
     this.date,
   });
 
-  String sid;
-  double price;
-  double close;
-  double change;
-  double high;
-  double low;
-  int volume;
-  DateTime date;
+  String? sid;
+  double? price;
+  double? close;
+  double? change;
+  double? high;
+  double? low;
+  int? volume;
+  DateTime? date;
 
   factory Datum.fromMap(Map<String, dynamic> json) => Datum(
         sid: json["sid"] == null ? null : json["sid"],
@@ -75,6 +75,6 @@ class Datum {
         "high": high == null ? null : high,
         "low": low == null ? null : low,
         "volume": volume == null ? null : volume,
-        "date": date == null ? null : date.toIso8601String(),
+        "date": date == null ? null : date,
       };
 }

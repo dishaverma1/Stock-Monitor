@@ -1,14 +1,16 @@
-import 'package:fl_chart/fl_chart.dart';
+// import 'package:fl_chart/fl_chart.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tickertape/models/chart_model.dart';
 import 'package:tickertape/models/stock_item_model.dart';
 import 'package:tickertape/utils/color_constants.dart';
 import 'package:tickertape/utils/string_constants.dart';
 
 class HistoryScreen extends StatefulWidget {
   final StockModel stockItem;
-  final List<StockModel> list;
-  const HistoryScreen({Key key, @required this.stockItem, this.list})
+  final List<ChartDataModel> data;
+  const HistoryScreen({Key? key, required this.stockItem, required this.data})
       : super(key: key);
 
   @override
@@ -16,6 +18,8 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  static const secondaryMeasureAxisId = 'secondaryMeasureAxisId';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,18 +34,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
               item: widget.stockItem,
             ),
             ChartWidget(
-              items: widget.list,
+              items: _createSampleData(),
             ),
           ],
         ),
       ),
     );
   }
+
+  List<charts.Series<ChartDataModel, int>> _createSampleData() {
+    return [
+      charts.Series<ChartDataModel, int>(
+        id: 'Stocks History',
+        domainFn: (ChartDataModel sales, _) => sales.time,
+        measureFn: (ChartDataModel sales, _) => sales.price,
+        data: widget.data,
+        colorFn: (ChartDataModel segment, _) =>
+            charts.MaterialPalette.blue.shadeDefault,
+      ),
+    ];
+  }
 }
 
 class PriceWidget extends StatelessWidget {
   final StockModel item;
-  const PriceWidget({Key key, @required this.item}) : super(key: key);
+  const PriceWidget({Key? key, required this.item}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -103,14 +120,37 @@ class PriceWidget extends StatelessWidget {
 }
 
 class ChartWidget extends StatelessWidget {
-  final List<StockModel> items;
-  const ChartWidget({Key key, @required this.items}) : super(key: key);
+  final List<charts.Series<ChartDataModel, int>> items;
+  const ChartWidget({Key? key, required this.items}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: LineChart(
-        LineChartData(),
+      height: 500,
+      margin: EdgeInsets.all(10),
+      child: new charts.LineChart(
+        items,
+        animate: true,
+        // domainAxis: charts.OrdinalAxisSpec(
+        //   renderSpec: charts.SmallTickRendererSpec(
+        //     lineStyle: charts.LineStyleSpec(
+        //         thickness: 0, color: charts.ColorUtil.fromDartColor(kASH_Colour)),
+        //     labelStyle: charts.TextStyleSpec(
+        //         fontFamily: 'Roboto-Medium',
+        //         fontSize: 14,
+        //         color: charts.ColorUtil.fromDartColor(kASH_Colour)),
+        //   ),
+        // ),
+        // defaultRenderer: charts.LineRendererConfig(
+        //   groupingType: charts.BarGroupingType.grouped,
+        //   cornerStrategy: const charts.ConstCornerStrategy(30),
+        // ),
+        // primaryMeasureAxis: charts.NumericAxisSpec(
+        //   tickProviderSpec: charts.BasicNumericTickProviderSpec(zeroBound: false),
+        // ),
+        // secondaryMeasureAxis: charts.NumericAxisSpec(
+        //     tickProviderSpec:
+        //         charts.BasicNumericTickProviderSpec(desiredTickCount: 5)),
       ),
     );
   }

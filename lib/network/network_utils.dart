@@ -26,9 +26,9 @@ class NetworkUtil {
 
   //------------------------------------------------------------- Methods -----------------------------------------------------------------------------
   /// Get Method -> Future<dynamic>
-  /// @param -> @required url -> String
+  /// @param -> required url -> String
   /// @usage -> Make HTTP-GET request to specified URL and returns the response in JSON format
-  Future<dynamic> get({@required String url}) =>
+  Future<dynamic> get({required String url}) =>
       http.get(Uri.parse(url)) // Make HTTP-GET request
           .then((http.Response response) {
         debugPrint("URL --> $url");
@@ -50,14 +50,14 @@ class NetworkUtil {
       });
 
   /// Post Method -> Future<dynamic>
-  /// @param -> @required url -> String
+  /// @param -> required url -> String
   ///        -> headers -> Map
   ///        -> body -> dynamic
   ///        -> encoding -> dynamic
   ///  @usage -> Make HTTP-POST request to specified URL and returns the response in JSON format
   Future<dynamic> post(
-          {@required String url,
-          Map<String, String> headers,
+          {required String url,
+          Map<String, String>? headers,
           body,
           encoding}) =>
       http

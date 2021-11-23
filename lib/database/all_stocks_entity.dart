@@ -4,11 +4,15 @@ import 'package:floor/floor.dart';
 
 @entity
 class Stocks {
-  @primaryKey
-  final String sid;
-  final double price;
-  final double change;
-  final bool isChangeUp;
+  @PrimaryKey(autoGenerate: true)
+  final int? id;
 
-  Stocks(this.sid, this.price, this.change, this.isChangeUp);
+  final String? sid;
+  final double? price;
+  final double? change;
+  final bool? isChangeUp;
+  final int? time;
+
+  Stocks(
+      {this.id, this.sid, this.price, this.change, this.isChangeUp, this.time});
 }

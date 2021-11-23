@@ -1,9 +1,7 @@
 // database.dart
-@JsonSerializable()
 import 'dart:async';
 
 import 'package:floor/floor.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 import 'package:tickertape/database/all_stocks_entity.dart';
 import 'package:tickertape/database/dao.dart';

@@ -9,7 +9,7 @@ class StockItem extends StatefulWidget {
   final int index;
   final StockModel stockModel;
 
-  const StockItem({Key key, @required this.index, @required this.stockModel})
+  const StockItem({Key? key, required this.index, required this.stockModel})
       : super(key: key);
 
   @override

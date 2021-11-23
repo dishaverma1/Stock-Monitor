@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tickertape/models/chart_model.dart';
+import 'package:tickertape/models/stock_item_model.dart';
 import 'package:tickertape/utils/baseview.dart';
 import 'package:tickertape/utils/color_constants.dart';
 import 'package:tickertape/utils/navigator.dart';
@@ -12,7 +14,7 @@ import 'package:tickertape/views/stock_item.dart';
 
 /// Home Screen -> View class for Home Screen to display fetched stocks
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key key}) : super(key: key);
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -20,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext buildContext) {
     return BaseView<HomeViewModel>(
       instanceModel: HomeViewModel(),
       onModelReady: (model) async {
@@ -43,12 +45,30 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             actions: [
-              Container(
-                margin: EdgeInsets.only(right: 10),
-                child: Icon(
-                  Icons.insert_chart_rounded,
-                  color: kBLACK,
-                  size: 26,
+              Builder(
+                builder: (BuildContext context) => Container(
+                  margin: EdgeInsets.only(right: 10),
+                  child: InkWell(
+                    onTap: () async {
+                      StockModel topStock = model.getExpensiveStock;
+                      List<ChartDataModel> list =
+                          await model.fetchStocksByPrice(topStock.stockName);
+
+                      // navigating to history screen of most expensive stock
+                      navigateTo(
+                          HistoryScreen(
+                            stockItem: topStock,
+                            data: list,
+                            // list: list,
+                          ),
+                          context);
+                    },
+                    child: Icon(
+                      Icons.insert_chart_rounded,
+                      color: kBLACK,
+                      size: 26,
+                    ),
+                  ),
                 ),
               ),
               Container(
@@ -79,14 +99,17 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView.separated(
                 shrinkWrap: true,
                 itemBuilder: (context, index) => InkWell(
-                      onTap: () {
-                        // List<StockModel> list = await model;
+                      onTap: () async {
+                        List<ChartDataModel> list =
+                            await model.fetchStocksByPrice(
+                                model.getStockList[index].stockName);
 
                         // navigating to history screen of particular stock
                         navigateTo(
                             HistoryScreen(
                               stockItem: model.getStockList[index],
-                              list: [],
+                              data: list,
+                              // list: list,
                             ),
                             context);
                       },

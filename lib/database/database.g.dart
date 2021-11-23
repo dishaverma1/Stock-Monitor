@@ -23,11 +23,11 @@ class $FloorAppDatabase {
 class _$AppDatabaseBuilder {
   _$AppDatabaseBuilder(this.name);
 
-  final String name;
+  final String? name;
 
   final List<Migration> _migrations = [];
 
-  Callback _callback;
+  Callback? _callback;
 
   /// Adds migrations to the builder.
   _$AppDatabaseBuilder addMigrations(List<Migration> migrations) {
@@ -44,7 +44,7 @@ class _$AppDatabaseBuilder {
   /// Creates the database and initializes it.
   Future<AppDatabase> build() async {
     final path = name != null
-        ? await sqfliteDatabaseFactory.getDatabasePath(name)
+        ? await sqfliteDatabaseFactory.getDatabasePath(name!)
         : ':memory:';
     final database = _$AppDatabase();
     database.database = await database.open(
@@ -57,14 +57,14 @@ class _$AppDatabaseBuilder {
 }
 
 class _$AppDatabase extends AppDatabase {
-  _$AppDatabase([StreamController<String> listener]) {
+  _$AppDatabase([StreamController<String>? listener]) {
     changeListener = listener ?? StreamController<String>.broadcast();
   }
 
-  StocksDao _stockdaoInstance;
+  StocksDao? _stockdaoInstance;
 
   Future<sqflite.Database> open(String path, List<Migration> migrations,
-      [Callback callback]) async {
+      [Callback? callback]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
       version: 1,
       onConfigure: (database) async {
@@ -82,7 +82,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `Stocks` (`sid` TEXT NOT NULL, `price` REAL NOT NULL, `change` REAL NOT NULL, `isChangeUp` INTEGER NOT NULL, PRIMARY KEY (`sid`))');
+            'CREATE TABLE IF NOT EXISTS `Stocks` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `sid` TEXT, `price` REAL, `change` REAL, `isChangeUp` INTEGER, `time` INTEGER)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -102,11 +102,15 @@ class _$StocksDao extends StocksDao {
         _stocksInsertionAdapter = InsertionAdapter(
             database,
             'Stocks',
-            (Stocks item) => <String, Object>{
+            (Stocks item) => <String, Object?>{
+                  'id': item.id,
                   'sid': item.sid,
                   'price': item.price,
                   'change': item.change,
-                  'isChangeUp': item.isChangeUp ? 1 : 0
+                  'isChangeUp': item.isChangeUp == null
+                      ? null
+                      : (item.isChangeUp! ? 1 : 0),
+                  'time': item.time
                 },
             changeListener);
 
@@ -121,24 +125,48 @@ class _$StocksDao extends StocksDao {
   @override
   Future<List<Stocks>> fetchAllStock() async {
     return _queryAdapter.queryList('SELECT * FROM Stocks',
-        mapper: (Map<String, Object> row) => Stocks(
-            row['sid'] as String,
-            row['price'] as double,
-            row['change'] as double,
-            (row['isChangeUp'] as int) != 0));
+        mapper: (Map<String, Object?> row) => Stocks(
+            id: row['id'] as int?,
+            sid: row['sid'] as String?,
+            price: row['price'] as double?,
+            change: row['change'] as double?,
+            isChangeUp: row['isChangeUp'] == null
+                ? null
+                : (row['isChangeUp'] as int) != 0,
+            time: row['time'] as int?));
   }
 
   @override
-  Stream<Stocks> findStocksById(int sid) {
-    return _queryAdapter.queryStream('SELECT * FROM Stocks WHERE sid = ?1',
-        mapper: (Map<String, Object> row) => Stocks(
-            row['sid'] as String,
-            row['price'] as double,
-            row['change'] as double,
-            (row['isChangeUp'] as int) != 0),
-        arguments: [sid],
+  Stream<Stocks?> findPersonById(int id) {
+    return _queryAdapter.queryStream('SELECT * FROM Stocks WHERE id = ?1',
+        mapper: (Map<String, Object?> row) => Stocks(
+            id: row['id'] as int?,
+            sid: row['sid'] as String?,
+            price: row['price'] as double?,
+            change: row['change'] as double?,
+            isChangeUp: row['isChangeUp'] == null
+                ? null
+                : (row['isChangeUp'] as int) != 0,
+            time: row['time'] as int?),
+        arguments: [id],
         queryableName: 'Stocks',
         isView: false);
+  }
+
+  @override
+  Future<List<double>?> getPriceBySid(String sid) async {
+    return await _queryAdapter.queryList(
+        'SELECT price FROM Stocks WHERE sid = ?1',
+        arguments: [sid],
+        mapper: (Map<String, Object?> row) => row['price'] as double);
+  }
+
+  @override
+  Future<List<int>?> getTimeBySid(String sid) async {
+    return await _queryAdapter.queryList(
+        'SELECT time FROM Stocks WHERE sid = ?1',
+        arguments: [sid],
+        mapper: (Map<String, Object?> row) => row['time'] as int);
   }
 
   @override
