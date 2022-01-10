@@ -1,8 +1,8 @@
-# TickerTape
+# Stock-Monitor
 
 <!--- These are examples. See https://shields.io for others or to customize this set of shields. You might want to include dependencies, project status and licence info here --->
 
-Project name is a `TickerTape` that allows `real-time tracking of stock prices`.
+Project name is a `Stock-Monitor` that allows `real-time tracking of stock prices`.
 
 The main feature of the app is the ability to track and record prices of stock and visualize the data. 
 
@@ -14,18 +14,18 @@ Before you begin, ensure you have met the following requirements:
 * You have a `<Windows/Linux/Mac>` machine. State which OS is supported/which is not.
 * You have read `<guide/link/documentation_related_to_project>`.
 
-## Installing TickerTape
+## Installing Stock-Monitor
 
-To install TickerTape, follow these steps:
+To install Stock-Monitor, follow these steps:
 
 - Open this app in Android Studio.
 - connect your device with system
 - build project
 
 
-## Using TickerTape
+## Using Stock-Monitor
 
-To use TickerTape, follow these steps:
+To use Stock-Monitor, follow these steps:
 
 1. Play Button: On click of the play button, the app starts fetching latest data every 5 seconds and recording the result of each stock. If the app is already in play mode it will go in pause mode and stop fetching and recording the prices. 
 2. History Button: On click of the history button the app redirects to the History page of the most expensive stock(the highest price) as per the last received API response. 
