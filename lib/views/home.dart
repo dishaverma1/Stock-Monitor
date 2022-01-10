@@ -78,20 +78,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     //checking if timer is on
                     // if timer OFF, setting it to ON & then polling API every 5 second
                     // if timer is ON, setting it to OFF & stop API call
-                    if (model.isTimerOn)
-                      model.setTimer(false);
-                    else
-                      model.setTimer(true);
+                    model.increaseCount();
                   },
                   child: Icon(
-                    model.isTimerOn
-                        ? Icons.stop_circle_outlined
-                        : Icons.play_circle_fill,
+                    // model.isTimerOn
+                    Icons.play_circle_fill,
+                    // : Icons.play_circle_fill,
                     color: kBlack,
                     size: 26,
                   ),
                 ),
-              )
+              ),
             ],
           ),
           body: Container(

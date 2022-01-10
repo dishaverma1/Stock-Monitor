@@ -1,12 +1,12 @@
-// import 'package:fl_chart/fl_chart.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:tickertape/models/chart_model.dart';
 import 'package:tickertape/models/stock_item_model.dart';
 import 'package:tickertape/utils/color_constants.dart';
 import 'package:tickertape/utils/string_constants.dart';
 
+/// HistoryScreen -> another screen to show best performing stock or history of the selected stock
 class HistoryScreen extends StatefulWidget {
   final StockModel stockItem;
   final List<ChartDataModel> data;
@@ -18,8 +18,6 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  static const secondaryMeasureAxisId = 'secondaryMeasureAxisId';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,28 +32,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
               item: widget.stockItem,
             ),
             ChartWidget(
-              items: _createSampleData(),
+              items: widget.data,
+              title: widget.stockItem.stockName,
             ),
           ],
         ),
       ),
     );
   }
-
-  List<charts.Series<ChartDataModel, int>> _createSampleData() {
-    return [
-      charts.Series<ChartDataModel, int>(
-        id: 'Stocks History',
-        domainFn: (ChartDataModel sales, _) => sales.time,
-        measureFn: (ChartDataModel sales, _) => sales.price,
-        data: widget.data,
-        colorFn: (ChartDataModel segment, _) =>
-            charts.MaterialPalette.blue.shadeDefault,
-      ),
-    ];
-  }
 }
 
+/// PriceWidget -> Widget to show basic details about the stock
 class PriceWidget extends StatelessWidget {
   final StockModel item;
   const PriceWidget({Key? key, required this.item}) : super(key: key);
@@ -119,39 +106,45 @@ class PriceWidget extends StatelessWidget {
   }
 }
 
-class ChartWidget extends StatelessWidget {
-  final List<charts.Series<ChartDataModel, int>> items;
-  const ChartWidget({Key? key, required this.items}) : super(key: key);
+/// ChartWidget -> chart to show stock analysis
+class ChartWidget extends StatefulWidget {
+  final List<ChartDataModel> items;
+  final String title;
+  const ChartWidget({Key? key, required this.items, required this.title})
+      : super(key: key);
+
+  @override
+  _ChartWidgetState createState() => _ChartWidgetState();
+}
+
+class _ChartWidgetState extends State<ChartWidget> {
+  late TooltipBehavior _tooltipBehavior;
+
+  @override
+  void initState() {
+    _tooltipBehavior = TooltipBehavior(enable: true);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 500,
       margin: EdgeInsets.all(10),
-      child: new charts.LineChart(
-        items,
-        animate: true,
-        // domainAxis: charts.OrdinalAxisSpec(
-        //   renderSpec: charts.SmallTickRendererSpec(
-        //     lineStyle: charts.LineStyleSpec(
-        //         thickness: 0, color: charts.ColorUtil.fromDartColor(kASH_Colour)),
-        //     labelStyle: charts.TextStyleSpec(
-        //         fontFamily: 'Roboto-Medium',
-        //         fontSize: 14,
-        //         color: charts.ColorUtil.fromDartColor(kASH_Colour)),
-        //   ),
-        // ),
-        // defaultRenderer: charts.LineRendererConfig(
-        //   groupingType: charts.BarGroupingType.grouped,
-        //   cornerStrategy: const charts.ConstCornerStrategy(30),
-        // ),
-        // primaryMeasureAxis: charts.NumericAxisSpec(
-        //   tickProviderSpec: charts.BasicNumericTickProviderSpec(zeroBound: false),
-        // ),
-        // secondaryMeasureAxis: charts.NumericAxisSpec(
-        //     tickProviderSpec:
-        //         charts.BasicNumericTickProviderSpec(desiredTickCount: 5)),
-      ),
+      child: new SfCartesianChart(
+          primaryXAxis: CategoryAxis(),
+          // Chart title
+          title: ChartTitle(text: widget.title),
+          // Enable tooltip
+          tooltipBehavior: _tooltipBehavior,
+          series: <LineSeries<ChartDataModel, int>>[
+            LineSeries<ChartDataModel, int>(
+                dataSource: widget.items,
+                xValueMapper: (ChartDataModel sales, _) => sales.time,
+                yValueMapper: (ChartDataModel sales, _) => sales.price,
+                // Enable data label
+                dataLabelSettings: DataLabelSettings(isVisible: true))
+          ]),
     );
   }
 }

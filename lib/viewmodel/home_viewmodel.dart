@@ -21,8 +21,13 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // to store which stock is most expensive
   late StockModel expensiveStock;
+
+  // getter for most expensive stock
   StockModel get getExpensiveStock => expensiveStock;
+
+  // setter for most expensive stock
   void setExpensiveStock(StockModel val) {
     expensiveStock = val;
     notifyListeners();
@@ -32,14 +37,34 @@ class HomeViewModel extends ChangeNotifier {
   Future<void> fetchStockList(List<String> stocks) async {
     debugPrint("calling fetch stock list");
     List<StockModel> stocksList = await StockNAO.getStocks(stocks: stocks);
+    // setting default value for expensive stock
     setExpensiveStock(stocksList[0]);
+
+    // setting fetched stock list
     setStockList(stocksList);
 
+    // setting calculated most expensive stock
     setExpensiveStock(getMostExpensiveStock(stocksList));
     debugPrint("Expensive stock - ${expensiveStock.stockName}");
+
+    // timer!.cancel();
   }
 
-  // timer for polling API every 5 sec
+  int count = -1;
+  int get getCount => count;
+
+  void increaseCount() {
+    count = count + 1;
+    if (!_timer) fetchStockEveryFiveSec();
+    notifyListeners();
+  }
+
+  void resetCount() {
+    count = 0;
+    notifyListeners();
+  }
+
+  // timer ON/OFF check bool for polling API every 5 sec
   bool _timer = false;
   bool get isTimerOn => _timer;
   void setTimer(bool val) {
@@ -51,11 +76,23 @@ class HomeViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // timer for polling API
   Timer? timer;
-
   void fetchStockEveryFiveSec() {
-    timer = Timer.periodic(
-        Duration(seconds: 5), (Timer t) => fetchStockList(FETCH_STOCKS));
+    debugPrint("count --- $count");
+    if (count == 0) {
+      fetchStockList(FETCH_STOCKS);
+      timer = Timer.periodic(Duration(seconds: 5), (Timer t) {
+        if (count > 0) {
+          fetchStockList(FETCH_STOCKS);
+          count--;
+          _timer = true;
+        } else {
+          _timer = false;
+          timer!.cancel();
+        }
+      });
+    }
   }
 
   /// fetchStocksByPrice-> function to fetch particular stocks stock
@@ -65,19 +102,15 @@ class HomeViewModel extends ChangeNotifier {
 
     List<double>? price = await database.stockdao.getPriceBySid(sid);
     List<int>? time = await database.stockdao.getTimeBySid(sid);
-    debugPrint("price length --- ${price!.toString()}");
-    debugPrint("time length --- ${time!.toString()}");
 
     List<ChartDataModel> chartList = [];
 
-    //showing only last 10 records
-    int length = price.length > 10 ? 10 : price.length;
-
-    for (int i = price.length - 1;
+    //showing only latest 10 records
+    for (int i = price!.length - 1;
         price.length > 10 ? i > price.length - 10 : i < price.length && i >= 0;
         i--) {
       debugPrint("$i ");
-      chartList.add(ChartDataModel(price[i], time[i]));
+      chartList.add(ChartDataModel(price[i], time![i]));
     }
     return chartList;
   }
@@ -88,6 +121,7 @@ class HomeViewModel extends ChangeNotifier {
     super.dispose();
   }
 
+  // method to calculate most expensive stock
   StockModel getMostExpensiveStock(List<StockModel> stocksList) {
     StockModel expensiveStock = stocksList[0];
     stocksList.reduce((a, b) {

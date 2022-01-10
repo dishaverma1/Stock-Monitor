@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// BaseView-> Change Notifier class to manage state
 class BaseView<T extends ChangeNotifier> extends StatefulWidget {
   final Widget Function(BuildContext context, T value, Widget? child) builder;
   final Function(T)? onModelReady;
